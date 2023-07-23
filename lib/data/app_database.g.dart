@@ -85,7 +85,7 @@ class _$AppDatabase extends AppDatabase {
       },
       onCreate: (database, version) async {
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `memes` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `url` TEXT NOT NULL, `width` INTEGER NOT NULL, `height` INTEGER NOT NULL, `boxCount` INTEGER NOT NULL, `captions` INTEGER NOT NULL)');
+            'CREATE TABLE IF NOT EXISTS `Meme` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `url` TEXT NOT NULL, `width` INTEGER NOT NULL, `height` INTEGER NOT NULL, `boxCount` INTEGER NOT NULL, `captions` INTEGER NOT NULL)');
 
         await callback?.onCreate?.call(database, version);
       },
@@ -103,11 +103,10 @@ class _$MemeDao extends MemeDao {
   _$MemeDao(
     this.database,
     this.changeListener,
-  )   : _queryAdapter = QueryAdapter(database, changeListener),
-        _memeDeletionAdapter = DeletionAdapter(
+  )   : _queryAdapter = QueryAdapter(database),
+        _memeInsertionAdapter = InsertionAdapter(
             database,
-            'memes',
-            ['id'],
+            'Meme',
             (Meme item) => <String, Object?>{
                   'id': item.id,
                   'name': item.name,
@@ -116,8 +115,7 @@ class _$MemeDao extends MemeDao {
                   'height': item.height,
                   'boxCount': item.boxCount,
                   'captions': item.captions
-                },
-            changeListener);
+                });
 
   final sqflite.DatabaseExecutor database;
 
@@ -125,11 +123,24 @@ class _$MemeDao extends MemeDao {
 
   final QueryAdapter _queryAdapter;
 
-  final DeletionAdapter<Meme> _memeDeletionAdapter;
+  final InsertionAdapter<Meme> _memeInsertionAdapter;
 
   @override
-  Stream<List<Meme>> getAllMeme() {
-    return _queryAdapter.queryListStream('SELECT * FROM Meme',
+  Future<List<Meme>> getAllMeme() async {
+    return _queryAdapter.queryList('SELECT * FROM Meme',
+        mapper: (Map<String, Object?> row) => Meme(
+            id: row['id'] as int,
+            name: row['name'] as String,
+            url: row['url'] as String,
+            width: row['width'] as int,
+            height: row['height'] as int,
+            boxCount: row['boxCount'] as int,
+            captions: row['captions'] as int));
+  }
+
+  @override
+  Future<Meme?> getMemeById(String id) async {
+    return _queryAdapter.query('SELECT * FROM Meme WHERE id=?1',
         mapper: (Map<String, Object?> row) => Meme(
             id: row['id'] as int,
             name: row['name'] as String,
@@ -138,13 +149,12 @@ class _$MemeDao extends MemeDao {
             height: row['height'] as int,
             boxCount: row['boxCount'] as int,
             captions: row['captions'] as int),
-        queryableName: 'Meme',
-        isView: false);
+        arguments: [id]);
   }
 
   @override
-  Stream<Meme?> getMemeById(String id) {
-    return _queryAdapter.queryStream('SELECT * FROM Meme WHERE id=?1',
+  Future<Meme?> deleteMeme(int id) async {
+    return _queryAdapter.query('DELETE FROM Meme WHERE id = ?1',
         mapper: (Map<String, Object?> row) => Meme(
             id: row['id'] as int,
             name: row['name'] as String,
@@ -153,13 +163,17 @@ class _$MemeDao extends MemeDao {
             height: row['height'] as int,
             boxCount: row['boxCount'] as int,
             captions: row['captions'] as int),
-        arguments: [id],
-        queryableName: 'Meme',
-        isView: false);
+        arguments: [id]);
   }
 
   @override
-  Future<void> deleteMeme(Meme meme) async {
-    await _memeDeletionAdapter.delete(meme);
+  Future<void> deleteAll() async {
+    await _queryAdapter.queryNoReturn('DELETE FROM Meme');
+  }
+
+  @override
+  Future<List<int>> insertMeme(List<Meme> meme) {
+    return _memeInsertionAdapter.insertListAndReturnIds(
+        meme, OnConflictStrategy.abort);
   }
 }

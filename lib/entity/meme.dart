@@ -1,9 +1,10 @@
 import 'package:floor/floor.dart';
 
-@Entity(tableName: 'memes')
+@Entity(tableName: 'Meme')
 class Meme {
   @PrimaryKey(autoGenerate: true)
   final int id;
+  
   final String name;
   final String url;
   final int width;

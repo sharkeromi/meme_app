@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:meme_app/controller/api_controller.dart';
 import 'package:meme_app/screens/widgets/meme_list.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({super.key});
-  // final AppDatabase database;
+  HomePage({super.key});
+  final APIController apiController = Get.put(APIController());
 
   @override
   Widget build(BuildContext context) {
@@ -20,36 +22,33 @@ class HomePage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 TextButton(
-                  onPressed: () {},
-                  child: Container(
-                    child: Center(
-                      child: Text("Network Staus"),
-                    ),
-                  ),
-                ),
-                TextButton(
                   onPressed: () {
-                    
+                    //  final meme =
                   },
-                  child: Container(
-                    child: Center(
-                      child: Text("Network Staus"),
-                    ),
+                  child: const Center(
+                    child: Text("Save Data"),
                   ),
                 ),
                 TextButton(
                   onPressed: () {},
-                  child: Container(
-                    child: Center(
-                      child: Text("Network Staus"),
-                    ),
+                  child: const Center(
+                    child: Text("Network Staus"),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {},
+                  child: const Center(
+                    child: Text("Network Staus"),
                   ),
                 ),
               ],
             ),
+            Obx(() => Text(apiController.connectionStatus.value)),
             Padding(
               padding: const EdgeInsets.only(left: 16, right: 16),
-              child: MemeList(),
+              child: Obx(() => MemeList(
+                    list: apiController.memeDataOffline.value,
+                  )),
             )
           ],
         ),

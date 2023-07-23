@@ -4,11 +4,17 @@ import 'package:meme_app/entity/meme.dart';
 @dao
 abstract class MemeDao {
   @Query('SELECT * FROM Meme')
-  Stream<List<Meme>> getAllMeme();
+  Future<List<Meme>> getAllMeme();
 
   @Query('SELECT * FROM Meme WHERE id=:id')
-  Stream<Meme?> getMemeById(String id);
+  Future<Meme?> getMemeById(String id);
 
-  @delete
-  Future<void> deleteMeme(Meme meme);
+  @insert
+  Future<List<int>> insertMeme(List<Meme> meme);
+
+  @Query('DELETE FROM Meme WHERE id = :id')
+  Future<Meme?> deleteMeme(int id);
+
+  @Query('DELETE FROM Meme')
+  Future<void> deleteAll();
 }
