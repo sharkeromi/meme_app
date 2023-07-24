@@ -13,8 +13,10 @@ abstract class MemeDao {
   Future<List<int>> insertMeme(List<Meme> meme);
 
   @Query('DELETE FROM Meme WHERE id = :id')
-  Future<Meme?> deleteMeme(int id);
+  Future<void> deleteMeme(int id);
 
   @Query('DELETE FROM Meme')
   Future<void> deleteAll();
 }
+
+//flutter packages pub run build_runner build

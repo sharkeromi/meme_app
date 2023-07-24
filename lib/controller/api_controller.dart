@@ -13,16 +13,23 @@ class APIController extends GetxController {
   RxString connectionStatus = RxString('');
 
   final Connectivity connectivity = Connectivity();
+  var database;
   @override
   void onInit() async {
     await initConnectivity();
     final connectivityResult = await (Connectivity().checkConnectivity());
-    final database =
+    database =
         await $FloorAppDatabase.databaseBuilder('app_database.g.dart').build();
     if (connectivityResult != ConnectivityResult.none) {
       await fetchMemes();
       await database.memeDao.deleteAll();
-      await addMemes(database, memeData.value);
+      for (int index = 0; index < memeData.length; index++) {
+        if (!memeDataOffline.contains(memeData[index].id)) {
+          await addMemes(database, [memeData[index]]);
+          log(memeData[index].id.toString());
+        }
+      }
+      //await addMemes(database, memeData.value);
     }
     memeDataOffline.value = await database.memeDao.getAllMeme();
     // log('after adding: ' + memeDataOffline.toString());
@@ -52,11 +59,15 @@ class APIController extends GetxController {
       final jsonBody = json.decode(response.body);
       //log(jsonBody.toString());
       final data = jsonBody['data']['memes'];
-
       memeData.addAll(data.map<Meme>((json) => Meme.fromJson(json)).toList());
-      // log("fetch data : " + memeData.toString());
-      // print(memes[)
-      // return memes;
+
+      //*image convert
+      // print(jsonBody['data']['memes'][0]['url']);
+      // final imageData = jsonBody['data']['memes'][0]['url'];
+      // http.Response imageResponse = await http.get(Uri.parse(imageData));
+      // String base64 = base64Encode(imageResponse.bodyBytes);
+      // log(base64);
+      //
     } else {
       // Handle error
       print('Failed to fetch memes');

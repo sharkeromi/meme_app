@@ -153,17 +153,9 @@ class _$MemeDao extends MemeDao {
   }
 
   @override
-  Future<Meme?> deleteMeme(int id) async {
-    return _queryAdapter.query('DELETE FROM Meme WHERE id = ?1',
-        mapper: (Map<String, Object?> row) => Meme(
-            id: row['id'] as int,
-            name: row['name'] as String,
-            url: row['url'] as String,
-            width: row['width'] as int,
-            height: row['height'] as int,
-            boxCount: row['boxCount'] as int,
-            captions: row['captions'] as int),
-        arguments: [id]);
+  Future<void> deleteMeme(int id) async {
+    await _queryAdapter
+        .queryNoReturn('DELETE FROM Meme WHERE id = ?1', arguments: [id]);
   }
 
   @override

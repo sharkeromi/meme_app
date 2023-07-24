@@ -46,9 +46,7 @@ class HomePage extends StatelessWidget {
             Obx(() => Text(apiController.connectionStatus.value)),
             Padding(
               padding: const EdgeInsets.only(left: 16, right: 16),
-              child: Obx(() => MemeList(
-                    list: apiController.memeDataOffline.value,
-                  )),
+              child: MemeList(),
             )
           ],
         ),
