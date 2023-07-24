@@ -139,7 +139,7 @@ class _$MemeDao extends MemeDao {
   }
 
   @override
-  Future<Meme?> getMemeById(String id) async {
+  Future<Meme?> getMemeById(int id) async {
     return _queryAdapter.query('SELECT * FROM Meme WHERE id=?1',
         mapper: (Map<String, Object?> row) => Meme(
             id: row['id'] as int,
@@ -164,8 +164,13 @@ class _$MemeDao extends MemeDao {
   }
 
   @override
-  Future<List<int>> insertMeme(List<Meme> meme) {
+  Future<void> insertMeme(Meme meme) async {
+    await _memeInsertionAdapter.insert(meme, OnConflictStrategy.abort);
+  }
+
+  @override
+  Future<List<int>> insertMemes(List<Meme> memes) {
     return _memeInsertionAdapter.insertListAndReturnIds(
-        meme, OnConflictStrategy.abort);
+        memes, OnConflictStrategy.abort);
   }
 }

@@ -7,10 +7,13 @@ abstract class MemeDao {
   Future<List<Meme>> getAllMeme();
 
   @Query('SELECT * FROM Meme WHERE id=:id')
-  Future<Meme?> getMemeById(String id);
+  Future<Meme?> getMemeById(int id);
 
   @insert
-  Future<List<int>> insertMeme(List<Meme> meme);
+  Future<void> insertMeme(Meme meme);
+
+  @insert
+  Future<List<int>> insertMemes(List<Meme> memes);
 
   @Query('DELETE FROM Meme WHERE id = :id')
   Future<void> deleteMeme(int id);

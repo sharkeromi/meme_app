@@ -20,24 +20,56 @@ class APIController extends GetxController {
     final connectivityResult = await (Connectivity().checkConnectivity());
     database =
         await $FloorAppDatabase.databaseBuilder('app_database.g.dart').build();
+    memeDataOffline.value = await database.memeDao.getAllMeme();
     if (connectivityResult != ConnectivityResult.none) {
       await fetchMemes();
-      await database.memeDao.deleteAll();
-      for (int index = 0; index < memeData.length; index++) {
-        if (!memeDataOffline.contains(memeData[index].id)) {
-          await addMemes(database, [memeData[index]]);
-          log(memeData[index].id.toString());
-        }
-      }
-      //await addMemes(database, memeData.value);
+      // await database.memeDao.deleteAll();
+      addToList();
     }
     memeDataOffline.value = await database.memeDao.getAllMeme();
-    // log('after adding: ' + memeDataOffline.toString());
     super.onInit();
   }
 
-  Future<List<int>> addMemes(AppDatabase db, List<Meme> meme) async {
-    return await db.memeDao.insertMeme(meme);
+  addToList()async{
+    for (var element in memeData) {
+        var foundMeme = await getMemeById(element.id);
+        if (foundMeme == null) {
+          log(element.id.toString());
+          try {
+            await addMeme(element);
+            // log("if " + memeDataOffline.length.toString());
+          } catch (e) {
+            log(e.toString());
+          }
+        } else {
+          log(memeDataOffline.length.toString());
+        }
+      }
+  }
+
+  Future<Meme?> getMemeById(int id) async {
+    return await database.memeDao.getMemeById(id);
+  }
+
+  Future<List<int>> addMemes(List<Meme> memes) async {
+    return await database.memeDao.insertMemes(memes);
+  }
+
+  Future<void> addMeme(Meme meme) async {
+    return await database.memeDao.insertMeme(meme);
+  }
+
+  Future<List<int>> addMemesById(
+      id, name, url, width, height, boxCount, captions) async {
+    Meme temp = Meme(
+        id: id,
+        name: name,
+        url: url,
+        width: width,
+        height: height,
+        boxCount: boxCount,
+        captions: captions);
+    return await database.memeDao.insertMeme([temp]);
   }
 
   Future initConnectivity() async {
