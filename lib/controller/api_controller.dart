@@ -8,12 +8,14 @@ import 'package:meme_app/entity/meme.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 class APIController extends GetxController {
+  final String _url = "https://api.imgflip.com/get_memes";
   RxList<Meme> memeData = RxList([]);
   RxList<Meme> memeDataOffline = RxList([]);
   RxString connectionStatus = RxString('');
 
   final Connectivity connectivity = Connectivity();
   var database;
+
   @override
   void onInit() async {
     await initConnectivity();
@@ -24,27 +26,40 @@ class APIController extends GetxController {
     if (connectivityResult != ConnectivityResult.none) {
       await fetchMemes();
       // await database.memeDao.deleteAll();
-      addToList();
+      await addToList();
     }
+    //deleteToSync();
     memeDataOffline.value = await database.memeDao.getAllMeme();
     super.onInit();
   }
 
-  addToList()async{
+  addToList() async {
     for (var element in memeData) {
-        var foundMeme = await getMemeById(element.id);
-        if (foundMeme == null) {
-          log(element.id.toString());
-          try {
-            await addMeme(element);
-            // log("if " + memeDataOffline.length.toString());
-          } catch (e) {
-            log(e.toString());
-          }
-        } else {
-          log(memeDataOffline.length.toString());
+      var foundMeme = await getMemeById(element.id);
+      if (foundMeme == null) {
+        log(element.id.toString());
+        try {
+          await addMeme(element);
+          // log("if " + memeDataOffline.length.toString());
+        } catch (e) {
+          log(e.toString());
         }
+      } else {
+        // log(memeDataOffline.length.toString());
       }
+    }
+  }
+
+  Future<void> deleteToSync() async {
+    // log("hello");
+    for (var element in memeDataOffline) {
+      // log("hi");
+      log(element.id.toString());
+      // if (memeDataOffline.length > memeData.length) {
+      //   // var foundMeme = await getMemeById(element.id);
+      //   log(memeDataOffline.length.toString());
+      // }
+    }
   }
 
   Future<Meme?> getMemeById(int id) async {
@@ -59,19 +74,6 @@ class APIController extends GetxController {
     return await database.memeDao.insertMeme(meme);
   }
 
-  Future<List<int>> addMemesById(
-      id, name, url, width, height, boxCount, captions) async {
-    Meme temp = Meme(
-        id: id,
-        name: name,
-        url: url,
-        width: width,
-        height: height,
-        boxCount: boxCount,
-        captions: captions);
-    return await database.memeDao.insertMeme([temp]);
-  }
-
   Future initConnectivity() async {
     final connectivityResult = await (Connectivity().checkConnectivity());
     if (connectivityResult == ConnectivityResult.mobile) {
@@ -83,8 +85,6 @@ class APIController extends GetxController {
     }
   }
 
-  final String _url = "https://api.imgflip.com/get_memes";
-
   Future<void> fetchMemes() async {
     final response = await http.get(Uri.parse(_url));
     if (response.statusCode == 200) {
@@ -92,6 +92,9 @@ class APIController extends GetxController {
       //log(jsonBody.toString());
       final data = jsonBody['data']['memes'];
       memeData.addAll(data.map<Meme>((json) => Meme.fromJson(json)).toList());
+
+      // memeData.removeLast();
+      // log(memeData.length.toString());
 
       //*image convert
       // print(jsonBody['data']['memes'][0]['url']);
@@ -102,7 +105,7 @@ class APIController extends GetxController {
       //
     } else {
       // Handle error
-      print('Failed to fetch memes');
+      log('Failed to fetch memes');
     }
   }
 }

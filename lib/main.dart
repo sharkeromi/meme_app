@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:meme_app/screens/homePage.dart';
+import 'package:meme_app/screens/home_page.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();

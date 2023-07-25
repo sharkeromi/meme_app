@@ -32,13 +32,13 @@ class HomePage extends StatelessWidget {
                 TextButton(
                   onPressed: () {},
                   child: const Center(
-                    child: Text("Network Staus"),
+                    child: Text("Network Status"),
                   ),
                 ),
                 TextButton(
                   onPressed: () {},
                   child: const Center(
-                    child: Text("Network Staus"),
+                    child: Text("Network Status"),
                   ),
                 ),
               ],
